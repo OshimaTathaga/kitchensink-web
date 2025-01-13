@@ -4,7 +4,7 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-d
 import AuthTabs from "./components/AuthTabs.jsx";
 import AdminView from "./views/AdminView.jsx";
 import ProfileView from "./views/ProfileView.jsx";
-import SideNavBar from './SideNavBar.jsx';
+import Layout from './Layout.jsx';
 import UserView from "./views/UserView.jsx";
 import {jwtDecode} from "jwt-decode";
 import {setAuthToken} from "./api/api.js";
@@ -34,14 +34,15 @@ export default function App() {
 
   return (
     <Router>
-      {auth.isAuthenticated && <SideNavBar role={auth.role} onLogout={handleLogout} />}
-      <Routes>
-        <Route path="/" element={auth.isAuthenticated ? <Navigate to="/profile" /> : <AuthTabs onLogin={handleLogin} />} />
-        <Route path="/profile" element={<ProtectedRoute auth={auth} role={["admin", "user"]}><ProfileView /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute auth={auth} role={["admin"]}><AdminView /></ProtectedRoute>} />
-        <Route path="/user" element={<ProtectedRoute auth={auth} role={["user"]}><UserView /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <Layout auth={auth} onLogout={handleLogout} >
+        <Routes>
+          <Route path="/" element={auth.isAuthenticated ? <Navigate to="/profile" /> : <AuthTabs onLogin={handleLogin} />} />
+          <Route path="/profile" element={<ProtectedRoute auth={auth} role={["admin", "user"]}><ProfileView /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute auth={auth} role={["admin"]}><AdminView /></ProtectedRoute>} />
+          <Route path="/user" element={<ProtectedRoute auth={auth} role={["user"]}><UserView /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Layout>
     </Router>
   );
 };

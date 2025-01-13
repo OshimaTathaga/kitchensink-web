@@ -5,6 +5,46 @@ import {DataGrid} from "@mui/x-data-grid";
 import {api} from "../api/api.js";
 import CustomAlert from "../components/CustomAlert.jsx";
 
+const columns = [
+    {
+        field: 'name',
+        headerName: 'Name',
+        width: 150,
+        sortable: true,
+        editable: true,
+    },
+    {
+        field: 'email',
+        headerName: 'Email',
+        width: 250,
+        sortable: true,
+        editable: true,
+    },
+    {
+        field: 'phoneNumber',
+        headerName: 'Phone Number',
+        type: 'number',
+        width: 250,
+        sortable: true,
+        editable: true,
+    },
+    {
+        field: 'role',
+        headerName: 'Role',
+        type: 'number',
+        width: 110,
+        sortable: true,
+        editable: false,
+    }
+];
+
+const containerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
 export default function AdminView() {
 
     const [users, setUsers] = useState([]);
@@ -12,39 +52,6 @@ export default function AdminView() {
     const [alertMessage, setAlertMessage] = useState(null);
 
     const handleCloseCustomAlert = () => setAlertMessage(null);
-
-    const columns = [
-        {
-            field: 'name',
-            headerName: 'Name',
-            width: 150,
-            sortable: true,
-            editable: true,
-        },
-        {
-            field: 'email',
-            headerName: 'Email',
-            width: 250,
-            sortable: true,
-            editable: true,
-        },
-        {
-            field: 'phoneNumber',
-            headerName: 'Phone Number',
-            type: 'number',
-            width: 250,
-            sortable: true,
-            editable: true,
-        },
-        {
-            field: 'role',
-            headerName: 'Role',
-            type: 'number',
-            width: 110,
-            sortable: true,
-            editable: false,
-        }
-    ];
 
     useEffect(() => {
         api.get('/api/members')
@@ -62,8 +69,8 @@ export default function AdminView() {
         .finally(() => setLoading(false));
     }, []);
 
-    return <Box sx={{ flexGrow: 1 }}>
-        <Typography variant="h1">Welcome admin.</Typography>
+    return <Box sx={containerStyle}>
+        <Typography variant="h1">Welcome admin</Typography>
         <Box sx={{height: 400, width: '100%'}}>
             <DataGrid
               rows={users}
