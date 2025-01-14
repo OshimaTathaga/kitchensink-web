@@ -22,22 +22,22 @@ export default function App() {
         const role = decoded?.roles[0]?.toLowerCase();
         
         setAuthToken(token);
-        return {isAuthenticated: true, role};
+        return {isAuthenticated: true, role, email: decoded?.sub};
       }
     }
     
-    return {isAuthenticated: false, role: null};
+    return {isAuthenticated: false, role: null, email: null};
   });
 
-  const handleLogin = (role) => setAuth({ isAuthenticated: true, role });
-  const handleLogout = () => setAuth({ isAuthenticated: false, role: null });
+  const handleLogin = (role, email) => setAuth({ isAuthenticated: true, role, email });
+  const handleLogout = () => setAuth({ isAuthenticated: false, role: null, email: null });
 
   return (
     <Router>
       <Layout auth={auth} onLogout={handleLogout} >
         <Routes>
           <Route path="/" element={auth.isAuthenticated ? <Navigate to="/profile" /> : <AuthTabs onLogin={handleLogin} />} />
-          <Route path="/profile" element={<ProtectedRoute auth={auth} role={["admin", "user"]}><ProfileView /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute auth={auth} role={["admin", "user"]}><ProfileView handleLogout={handleLogout} email={auth.email}/></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute auth={auth} role={["admin"]}><AdminView /></ProtectedRoute>} />
           <Route path="/user" element={<ProtectedRoute auth={auth} role={["user"]}><UserView /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" />} />

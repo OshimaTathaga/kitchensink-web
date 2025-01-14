@@ -4,7 +4,7 @@ import {TextField, Button, Box, Typography, Divider, Tooltip} from '@mui/materia
 import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import MicrosoftIcon from '@mui/icons-material/AccountCircle';
-import {api, setAuthToken} from "../api/api.js";
+import {setAuthToken} from "../api/api.js";
 import {jwtDecode} from "jwt-decode";
 import axios from "axios";
 
@@ -44,7 +44,7 @@ const LoginForm = ({onLogin}) => {
             const decoded = jwtDecode(token);
             const role = decoded?.roles[0]?.toLowerCase();
             
-            onLogin(role);
+            onLogin(role, email);
         } catch (err) {
             setError(err.response?.data?.message || "Login failed. Try again.");
         }
