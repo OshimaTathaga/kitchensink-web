@@ -6,37 +6,38 @@ export const getUser = async (email) => {
 
         const response = await axios.get(`http://localhost:9000/api/members/${email}`, {
             headers: {
-                Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+                Authorization: `Bearer ${token}`,
             },
         });
 
         return response.data;
     }
     catch(err) {
-        console.log("Error while creating user", email, err?.message)
+        console.log("Error while getting user", email, err?.message)
     }
 }
 
-export const updateUser = async (user) => {
+export const updateUser = async (email, user) => {
     try{
         const token = localStorage.getItem("token");
 
-        const response = await axios.patch(`http://localhost:9000/api/members/${user.email}`, 
+        const response = await axios.patch(`http://localhost:9000/api/members/${email}`, 
         {
             name: user.name,
+            email: user.email,
             phoneNumber: user.phoneNumber,
             password: user.password
         },
         {
             headers: {
-                Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+                Authorization: `Bearer ${token}`,
             },
         });
 
         return response.data;
     }
     catch(err) {
-        console.log("Error while updating user", user.email, err?.message)
+        console.log("Error while updating user", email, err?.message)
     }
 }
 
@@ -46,7 +47,7 @@ export const deleteUser = async (email) => {
 
         await axios.delete(`http://localhost:9000/api/members/${email}`, {
             headers: {
-                Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+                Authorization: `Bearer ${token}`,
             },
         });
 
@@ -56,3 +57,39 @@ export const deleteUser = async (email) => {
         console.log("Error while deleting user", email, err?.message)
     }
 }
+
+export const updateUserRole = async (email, roles) => {
+    try{
+        const token = localStorage.getItem("token");
+
+        await axios.put(`http://localhost:9000/api/members/${email}/roles`, 
+        [...roles],
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        console.log(`User with email ${email} updated successfully with roles ${roles}.`);
+    }
+    catch(err) {
+        console.log("Error while updating user roles", email, err?.message)
+    }
+}
+
+export const createUser = async (user) => {
+    const {name, email, phoneNumber} = user;
+
+    try{
+        const response = await axios.post(`http://localhost:9000/api/members`, 
+        {
+            name, email, phoneNumber, password: "password1234"
+        });
+
+        return response.data;
+    }
+    catch(err) {
+        console.log("Error while creating user", user.email, err?.message)
+    }
+}
+

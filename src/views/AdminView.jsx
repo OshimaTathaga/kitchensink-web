@@ -14,7 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import { api } from "../api/api.js";
 import CustomAlert from "../components/CustomAlert.jsx";
-import { deleteUser, updateUser } from '../api/userService.js';
+import { deleteUser, updateUserRole, updateUser, createUser } from '../api/userService.js';
 
 const containerStyle = {
   display: "flex",
@@ -32,7 +32,7 @@ const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handle
           width: 200,
           align: 'left',
           headerAlign: 'left',
-          editable: false,
+          editable: true,
         },
         {
           field: 'phoneNumber',
@@ -106,14 +106,14 @@ const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handle
 }
 
 const AddUserToolbar = (props) => {
-    const { setRows, setRowModesModel } = props;
+    const { setUsers, setRowModesModel } = props;
   
     const id = Math.random().toString(36).substring(2, 9);
 
     const handleClick = () => {
-      setRows((oldRows) => [
+      setUsers((oldRows) => [
         ...oldRows,
-        { id, name: '', email: '', phoneNumber: '', role: '' },
+        { id, name: '', email: '', phoneNumber: '', role: "user", isNew: true },
       ]);
       setRowModesModel((oldModel) => ({
         ...oldModel,
@@ -173,12 +173,30 @@ export default function AdminView() {
         ...rowModesModel,
         [id]: { mode: GridRowModes.View, ignoreModifications: true },
       });
+
+      const editedRow = users.find((row) => row.id === id);
+      if (editedRow.isNew) {
+        setUsers(users.filter((row) => row.id !== id));
+      }
     };
+
+    const createNewUser = async (newUser) => {
+      await createUser(newUser)
+      await updateUserRole(newUser.email, [(newUser.role).toUpperCase()])
+    }
+
+    const updateExistingUser = async (newUser) => {
+      const oldUser = findUser(newUser.id);
+      await updateUser(oldUser.email, newUser);
+      await updateUserRole(oldUser.email, [(newUser.role).toUpperCase()])
+    }
   
     const processRowUpdate = async (newUser) => {
-      await updateUser(newUser)
-      setUsers(users.map((user) => (user.id === newUser.id ? newUser : user)));
-      return newUser;
+      newUser.isNew ? createNewUser(newUser) : updateExistingUser(newUser);
+
+      const updatedRow = { ...newUser, isNew: false };
+      setUsers(users.map((row) => (row.id === newUser.id ? updatedRow : row)));
+      return updatedRow;
     };
   
     const handleRowModesModelChange = (newRowModesModel) => {
@@ -195,13 +213,6 @@ export default function AdminView() {
             rows={users}
             columns={getColumns({handleSaveClick, handleCancelClick, handleEditClick, handleDeleteClick, rowModesModel})}
             loading={loading}
-            initialState={{
-                pagination: {
-                    paginationModel: {
-                        pageSize: 5,
-                    },
-                },
-            }}
             pageSizeOptions={[5]}
             editMode="row"
             rowModesModel={rowModesModel}

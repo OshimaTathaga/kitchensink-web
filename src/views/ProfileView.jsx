@@ -22,7 +22,7 @@ const ProfileView = ({handleLogout, email}) => {
   }
 
   const handleSave = async (user) => {
-    const updatedUser = await updateUser(user);
+    const updatedUser = await updateUser(user.email, user);
     setUser(updatedUser);
   }
 
