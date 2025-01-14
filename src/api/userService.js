@@ -17,15 +17,15 @@ export const getUser = async (email) => {
     }
 }
 
-export const updateUser = async (email, data) => {
+export const updateUser = async (user) => {
     try{
         const token = localStorage.getItem("token");
 
-        const response = await axios.patch(`http://localhost:9000/api/members/${email}`, 
+        const response = await axios.patch(`http://localhost:9000/api/members/${user.email}`, 
         {
-            name: data.name,
-            phoneNumber: data.phoneNumber,
-            password: data.password
+            name: user.name,
+            phoneNumber: user.phoneNumber,
+            password: user.password
         },
         {
             headers: {
@@ -36,7 +36,7 @@ export const updateUser = async (email, data) => {
         return response.data;
     }
     catch(err) {
-        console.log("Error while updating user", email, err?.message)
+        console.log("Error while updating user", user.email, err?.message)
     }
 }
 

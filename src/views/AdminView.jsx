@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import { api } from "../api/api.js";
 import CustomAlert from "../components/CustomAlert.jsx";
+import { deleteUser, updateUser } from '../api/userService.js';
 
 const containerStyle = {
   display: "flex",
@@ -134,7 +135,6 @@ export default function AdminView() {
     const [loading, setLoading] = useState(true);
     const [alertMessage, setAlertMessage] = useState(null);
     const [rowModesModel, setRowModesModel] = useState({});
-    const [rows, setRows] = useState(users);
 
     useEffect(() => {
         api.get('/api/members')
@@ -151,6 +151,8 @@ export default function AdminView() {
         .catch((error) => setAlertMessage({children: error?.message || 'Some error occurred.', severity: 'error'}))
         .finally(() => setLoading(false));
     }, []);
+
+    const findUser = (id) => users.find((user) => user.id === id);
   
     const handleEditClick = (id) => {
       setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
@@ -160,8 +162,10 @@ export default function AdminView() {
       setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
     };
   
-    const handleDeleteClick = (id) => {
-      setRows(rows.filter((row) => row.id !== id));
+    const handleDeleteClick = async (id) => {
+      const user = findUser(id);
+      await deleteUser(user.email)
+      setUsers(users.filter((row) => row.id !== id));
     };
   
     const handleCancelClick = (id) => {
@@ -171,9 +175,10 @@ export default function AdminView() {
       });
     };
   
-    const processRowUpdate = (newRow) => {
-      setRows(rows.map((row) => (row.id === newRow.id ? newRow : row)));
-      return newRow;
+    const processRowUpdate = async (newUser) => {
+      await updateUser(newUser)
+      setUsers(users.map((user) => (user.id === newUser.id ? newUser : user)));
+      return newUser;
     };
   
     const handleRowModesModelChange = (newRowModesModel) => {
@@ -204,7 +209,7 @@ export default function AdminView() {
             processRowUpdate={processRowUpdate}
             slots={{ toolbar: AddUserToolbar }}
             slotProps={{
-              toolbar: { setRows, setRowModesModel },
+              toolbar: { setUsers, setRowModesModel },
             }}
             />
         </Box>
