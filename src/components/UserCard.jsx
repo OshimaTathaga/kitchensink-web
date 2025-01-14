@@ -11,6 +11,7 @@ import {
 import Grid from '@mui/material/Grid2';
 import { useState } from "react";
 import EditableTextField from "./EditableTextField";
+import AlertPopup from '../components/AlertPopup.jsx';
 
 const cardStyle = {
   minWidth: "345px",
@@ -34,6 +35,8 @@ const editableTextStyle = {
 const UserCard = ({ user, onSave, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(user);
+  const [isOpen, setIsOpen] = useState(false)
+
   const { name, email, phoneNumber, password } = formData;
   const maskedPassword = "supersecretpassword".replace(/./g, "*");
 
@@ -50,42 +53,52 @@ const UserCard = ({ user, onSave, onDelete }) => {
   };
 
   return (
-    <Card sx={cardStyle} >
-      <CardHeader
-        sx={cardHeaderStyle}
-        avatar={
-          <Avatar sx={{width: "200px", height: "200px", marginLeft: "32px"}} alt={name} src="/public/avatar.jpg" />
-        }
-        action={
-          <Box>
-            <IconButton onClick={onDelete} aria-label="delete" >
-              <Delete />
-            </IconButton>
-            <IconButton onClick={isEditing ? handleSave : toggleEdit} aria-label="edit">
-              {isEditing ? <Save /> : <Edit />}
-            </IconButton>
-          </Box>
-        }
-      />
-
-      <CardContent>
-        <Grid container spacing={"16px"}>
-          <Grid item xs={6} sx={gridItemStyle}>
-            <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Name:</Typography>
-            <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Email:</Typography>
-            <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Phone:</Typography>
-            <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Password:</Typography>
+    <>
+      <Card sx={cardStyle} >
+        <CardHeader
+          sx={cardHeaderStyle}
+          avatar={
+            <Avatar sx={{width: "200px", height: "200px", marginLeft: "32px"}} alt={name} src="/public/avatar.jpg" />
+          }
+          action={
+            <Box>
+              <IconButton onClick={() => setIsOpen(true)} aria-label="delete" >
+                <Delete />
+              </IconButton>
+              <IconButton onClick={isEditing ? handleSave : toggleEdit} aria-label="edit">
+                {isEditing ? <Save /> : <Edit />}
+              </IconButton>
+            </Box>
+          }
+        />
+  
+        <CardContent>
+          <Grid container spacing={"16px"}>
+            <Grid item xs={6} sx={gridItemStyle}>
+              <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Name:</Typography>
+              <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Email:</Typography>
+              <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Phone:</Typography>
+              <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Password:</Typography>
+            </Grid>
+        
+            <Grid item xs={6} sx={gridItemStyle}>
+              <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handleChange} name="name" value={name} />
+              <Typography variant="body1" sx={editableTextStyle}>{email}</Typography>
+              <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handleChange} name="phoneNumber" value={phoneNumber} />
+              <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handleChange} name="password" value={isEditing ? password : maskedPassword} />
+            </Grid>
           </Grid>
-
-          <Grid item xs={6} sx={gridItemStyle}>
-            <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handleChange} name="name" value={name} />
-            <Typography variant="body1" sx={editableTextStyle}>{email}</Typography>
-            <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handleChange} name="phoneNumber" value={phoneNumber} />
-            <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handleChange} name="password" value={isEditing ? password : maskedPassword} />
-          </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      {isOpen && (
+          <AlertPopup
+            isOpen={isOpen}
+            message={"Are you sure you want to delete your own profile?"}
+            handleAgreeClick={onDelete}
+            handleClose={() => setIsOpen(false)}
+          />
+      )}
+    </>
   );
 };
 

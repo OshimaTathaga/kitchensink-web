@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Drawer,
@@ -35,9 +34,9 @@ const mainStyle = {
 }
 
 const Layout = ({ children, auth, onLogout }) => {
-  if (!auth.isAuthenticated) return children;
-
   const navigate = useNavigate();
+
+  if (!auth.isAuthenticated) return children;
 
   const handleLogout = () => {
     setAuthToken(null); // Clear token

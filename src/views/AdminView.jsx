@@ -3,7 +3,7 @@ import CancelIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import Button from '@mui/material/Button';
 import {
     DataGrid,
@@ -15,8 +15,10 @@ import { useEffect, useState } from "react";
 import { api } from "../api/api.js";
 import CustomAlert from "../components/CustomAlert.jsx";
 import { deleteUser, updateUserRole, updateUser, createUser } from '../api/userService.js';
+import AlertPopup from '../components/AlertPopup.jsx';
 
 const containerStyle = {
+  width: "70vw",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
@@ -25,11 +27,11 @@ const containerStyle = {
 
 const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handleCancelClick, rowModesModel}) => {
     const columns = [
-        { field: 'name', headerName: 'Name', width: 180, editable: true },
+        { field: 'name', headerName: 'Name', width: 190, editable: true },
         {
           field: 'email',
           headerName: 'Email',
-          width: 200,
+          width: 300,
           align: 'left',
           headerAlign: 'left',
           editable: true,
@@ -37,7 +39,7 @@ const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handle
         {
           field: 'phoneNumber',
           headerName: 'Phone Number',
-          width: 120,
+          width: 250,
           align: 'left',
           headerAlign: 'left',
           editable: true,
@@ -45,7 +47,7 @@ const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handle
         {
           field: 'role',
           headerName: 'Role',
-          width: 100,
+          width: 150,
           editable: true,
           type: 'singleSelect',
           valueOptions: ['admin', 'user'],
@@ -54,7 +56,7 @@ const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handle
           field: 'actions',
           type: 'actions',
           headerName: 'Actions',
-          width: 100,
+          width: 200,
           cellClassName: 'actions',
           getActions: ({ id }) => {
             const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -135,6 +137,8 @@ export default function AdminView() {
     const [loading, setLoading] = useState(true);
     const [alertMessage, setAlertMessage] = useState(null);
     const [rowModesModel, setRowModesModel] = useState({});
+    const [isOpen, setIsOpen] = useState(false)
+    const [userIdToDelete, setUserIdToDelete] = useState()
 
     useEffect(() => {
         api.get('/api/members')
@@ -162,11 +166,16 @@ export default function AdminView() {
       setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
     };
   
-    const handleDeleteClick = async (id) => {
-      const user = findUser(id);
+    const handleAgreeDelete = async () => {
+      const user = findUser(userIdToDelete);
       await deleteUser(user.email)
-      setUsers(users.filter((row) => row.id !== id));
+      setUsers(users.filter((row) => row.id !== userIdToDelete));
     };
+
+    const handleDeleteClick = (id) => {
+      setUserIdToDelete(id);
+      setIsOpen(true);
+    }
   
     const handleCancelClick = (id) => {
       setRowModesModel({
@@ -205,25 +214,38 @@ export default function AdminView() {
 
     const handleCloseCustomAlert = () => setAlertMessage(null);   
 
-    return <Box sx={containerStyle}>
-        <Typography variant="h1">Welcome Admin!</Typography>
-
-        <Box sx={{height: 400, width: '100%'}}>
-            <DataGrid
-            rows={users}
-            columns={getColumns({handleSaveClick, handleCancelClick, handleEditClick, handleDeleteClick, rowModesModel})}
-            loading={loading}
-            pageSizeOptions={[5]}
-            editMode="row"
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            processRowUpdate={processRowUpdate}
-            slots={{ toolbar: AddUserToolbar }}
-            slotProps={{
-              toolbar: { setUsers, setRowModesModel },
-            }}
-            />
-        </Box>
+    return (
+      <Box sx={containerStyle}>
+        <DataGrid
+          sx={{ width: "100%" }}
+          rows={users}
+          columns={getColumns({
+            handleSaveClick,
+            handleCancelClick,
+            handleEditClick,
+            handleDeleteClick,
+            rowModesModel,
+          })}
+          loading={loading}
+          pageSizeOptions={[5]}
+          editMode="row"
+          rowModesModel={rowModesModel}
+          onRowModesModelChange={handleRowModesModelChange}
+          processRowUpdate={processRowUpdate}
+          slots={{ toolbar: AddUserToolbar }}
+          slotProps={{
+            toolbar: { setUsers, setRowModesModel },
+          }}
+        />
         <CustomAlert alertMessage={alertMessage} handleCloseCustomAlert={handleCloseCustomAlert}/>
-    </Box>;
+        {isOpen && (
+          <AlertPopup
+            isOpen={isOpen}
+            message={`Are you sure you want to delete user with email ${findUser(userIdToDelete)?.email}?`}
+            handleAgreeClick={handleAgreeDelete}
+            handleClose={() => setIsOpen(false)}
+          />
+        )}
+      </Box>
+    );
 };

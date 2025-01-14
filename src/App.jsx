@@ -1,6 +1,5 @@
 import {useState} from "react";
 import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
-
 import AuthTabs from "./components/AuthTabs.jsx";
 import AdminView from "./views/AdminView.jsx";
 import ProfileView from "./views/ProfileView.jsx";
