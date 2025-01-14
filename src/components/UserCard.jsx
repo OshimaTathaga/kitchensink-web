@@ -58,7 +58,7 @@ const UserCard = ({ user, onSave, onDelete }) => {
         }
         action={
           <Box>
-            <IconButton onClick={onDelete} aria-label="delete" color="error">
+            <IconButton onClick={onDelete} aria-label="delete" >
               <Delete />
             </IconButton>
             <IconButton onClick={isEditing ? handleSave : toggleEdit} aria-label="edit">

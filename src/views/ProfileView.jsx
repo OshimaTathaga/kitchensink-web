@@ -13,7 +13,7 @@ const ProfileView = ({handleLogout, email}) => {
     };
 
     fetchUserData(); 
-  }, [])
+  }, [email])
 
   const handleDelete = async () => {
     await deleteUser(email)
