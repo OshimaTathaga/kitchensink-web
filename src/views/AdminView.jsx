@@ -16,6 +16,7 @@ import { api } from "../api/api.js";
 import CustomAlert from "../components/CustomAlert.jsx";
 import { deleteUser, updateUserRole, updateUser, createUser } from '../api/userService.js';
 import AlertPopup from '../components/AlertPopup.jsx';
+import { useGridApiRef } from '@mui/x-data-grid';
 
 const containerStyle = {
   width: "70vw",
@@ -25,84 +26,95 @@ const containerStyle = {
   alignItems: "center",
 };
 
-const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handleCancelClick, rowModesModel}) => {
+const getCellClassName = (isRowInEditMode) => isRowInEditMode ? "editable-cell" : ""
+
+const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handleCancelClick, isRowInEditMode}) => {
     const columns = [
-        { field: 'name', headerName: 'Name', width: 190, editable: true },
-        {
-          field: 'email',
-          headerName: 'Email',
-          width: 300,
-          align: 'left',
-          headerAlign: 'left',
-          editable: true,
-        },
-        {
-          field: 'phoneNumber',
-          headerName: 'Phone Number',
-          width: 250,
-          align: 'left',
-          headerAlign: 'left',
-          editable: true,
-        },
-        {
-          field: 'role',
-          headerName: 'Role',
-          width: 150,
-          editable: true,
-          type: 'singleSelect',
-          valueOptions: ['admin', 'user'],
-        },
-        {
-          field: 'actions',
-          type: 'actions',
-          headerName: 'Actions',
-          width: 200,
-          cellClassName: 'actions',
-          getActions: ({ id }) => {
-            const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-    
-            if (isInEditMode) {
-              return [
-                <GridActionsCellItem
-                  key={"Save"}
-                  icon={<SaveIcon />}
-                  label="Save"
-                  sx={{
-                    color: 'primary.main',
-                  }}
-                  onClick={() => handleSaveClick(id)}
-                />,
-                <GridActionsCellItem
-                  key={"Cancel"}
-                  icon={<CancelIcon />}
-                  label="Cancel"
-                  className="textPrimary"
-                  onClick={() => handleCancelClick(id)}
-                  color="inherit"
-                />,
-              ];
-            }
-    
+      {
+        field: "name",
+        headerName: "Name",
+        width: 190,
+        editable: true,
+        cellClassName: ({id}) => getCellClassName(isRowInEditMode(id)),
+      },
+      {
+        field: "email",
+        headerName: "Email",
+        width: 300,
+        align: "left",
+        headerAlign: "left",
+        editable: true,
+        cellClassName: ({id}) => getCellClassName(isRowInEditMode(id)),
+      },
+      {
+        field: "phoneNumber",
+        headerName: "Phone Number",
+        width: 250,
+        align: "left",
+        headerAlign: "left",
+        editable: true,
+        cellClassName: ({id}) => getCellClassName(isRowInEditMode(id)),
+      },
+      {
+        field: "role",
+        headerName: "Role",
+        width: 150,
+        editable: true,
+        type: "singleSelect",
+        valueOptions: ["admin", "user"],
+        cellClassName: ({id}) => getCellClassName(isRowInEditMode(id)),
+      },
+      {
+        field: "actions",
+        type: "actions",
+        headerName: "Actions",
+        width: 200,
+        cellClassName: "actions",
+        getActions: ({ id }) => {
+          const isInEditMode = isRowInEditMode(id);
+
+          if (isInEditMode) {
             return [
               <GridActionsCellItem
-                key={"Edit"}
-                icon={<EditIcon />}
-                label="Edit"
-                className="textPrimary"
-                onClick={() => handleEditClick(id)}
-                color="inherit"
+                key={"Save"}
+                icon={<SaveIcon />}
+                label="Save"
+                sx={{
+                  color: "primary.main",
+                }}
+                onClick={() => handleSaveClick(id)}
               />,
               <GridActionsCellItem
-                key={"Delete"}
-                icon={<DeleteIcon />}
-                label="Delete"
-                onClick={() => handleDeleteClick(id)}
+                key={"Cancel"}
+                icon={<CancelIcon />}
+                label="Cancel"
+                className="textPrimary"
+                onClick={() => handleCancelClick(id)}
                 color="inherit"
               />,
             ];
-          },
+          }
+
+          return [
+            <GridActionsCellItem
+              key={"Edit"}
+              icon={<EditIcon />}
+              label="Edit"
+              className="textPrimary"
+              onClick={() => handleEditClick(id)}
+              color="inherit"
+            />,
+            <GridActionsCellItem
+              key={"Delete"}
+              icon={<DeleteIcon />}
+              label="Delete"
+              onClick={() => handleDeleteClick(id)}
+              color="inherit"
+            />,
+          ];
         },
-      ]; 
+      },
+    ]; 
 
       return columns;
 }
@@ -139,6 +151,9 @@ export default function AdminView() {
     const [rowModesModel, setRowModesModel] = useState({});
     const [isOpen, setIsOpen] = useState(false)
     const [userIdToDelete, setUserIdToDelete] = useState()
+    const apiRef = useGridApiRef(); 
+
+    const isRowInEditMode = (id) => rowModesModel[id]?.mode === GridRowModes.Edit;
 
     useEffect(() => {
         api.get('/api/members')
@@ -159,6 +174,10 @@ export default function AdminView() {
     const findUser = (id) => users.find((user) => user.id === id);
   
     const handleEditClick = (id) => {
+      setTimeout(() => {
+        apiRef.current.setCellFocus(id, 'name');
+      });
+      
       setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
     };
   
@@ -217,6 +236,7 @@ export default function AdminView() {
     return (
       <Box sx={containerStyle}>
         <DataGrid
+          apiRef={apiRef}
           sx={{ width: "100%" }}
           rows={users}
           columns={getColumns({
@@ -224,7 +244,7 @@ export default function AdminView() {
             handleCancelClick,
             handleEditClick,
             handleDeleteClick,
-            rowModesModel,
+            isRowInEditMode,
           })}
           loading={loading}
           pageSizeOptions={[5]}

@@ -52,6 +52,11 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.editable-cell {
+  background-color: #ffdfba80; 
+  border: 0.5px solid #6489a6cc;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
