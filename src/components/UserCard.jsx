@@ -86,6 +86,7 @@ const UserCard = ({ user, onSave, onDelete }) => {
               <Typography variant="body1" sx={editableTextStyle}>{email}</Typography>
               <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handleChange} name="phoneNumber" value={phoneNumber} />
               <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handleChange} name="password" value={isEditing ? password : maskedPassword} />
+              {/* <Typography variant="body1" sx={editableTextStyle}>{maskedPassword}</Typography> */}
             </Grid>
           </Grid>
         </CardContent>
