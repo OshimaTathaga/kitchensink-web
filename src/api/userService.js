@@ -14,6 +14,7 @@ export const getUser = async (email) => {
     }
     catch(err) {
         console.log("Error while getting user", email, err?.message)
+        throw new Error(err.message); 
     }
 }
 
@@ -26,7 +27,7 @@ export const updateUser = async (email, user) => {
             name: user.name,
             email: user.email,
             phoneNumber: user.phoneNumber,
-            password: user.password
+            password: user.password === "" ? undefined : user.password
         },
         {
             headers: {
@@ -38,6 +39,7 @@ export const updateUser = async (email, user) => {
     }
     catch(err) {
         console.log("Error while updating user", email, err?.message)
+        throw new Error(err.message); 
     }
 }
 
@@ -55,6 +57,7 @@ export const deleteUser = async (email) => {
     }
     catch(err) {
         console.log("Error while deleting user", email, err?.message)
+        throw new Error(err.message); 
     }
 }
 
@@ -74,6 +77,7 @@ export const updateUserRole = async (email, roles) => {
     }
     catch(err) {
         console.log("Error while updating user roles", email, err?.message)
+        throw new Error(err.message); 
     }
 }
 
@@ -90,6 +94,7 @@ export const createUser = async (user) => {
     }
     catch(err) {
         console.log("Error while creating user", user.email, err?.message)
+        throw new Error(err.message); 
     }
 }
 

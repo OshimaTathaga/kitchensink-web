@@ -26,7 +26,26 @@ const containerStyle = {
   alignItems: "center",
 };
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
+const phoneRegex = /^\d{10}$/; // Exactly 10 digits for Indian numbers
+
 const getCellClassName = (isRowInEditMode) => isRowInEditMode ? "editable-cell" : ""
+
+const validateUser = (user) => {
+  if (!user.name || user.name.length < 5) {
+    return { valid: false, error: "Name cannot be empty" };
+  }
+
+  if (!user.email || emailRegex.test(user.email)) {
+    return { valid: false, error: "Please enter a valid email address." };
+  }
+
+  if (!user.phoneNumber || phoneRegex.test(user.phoneNumber)) {
+    return { valid: false, error: "Phone number must be at least 10 digits long" };
+  }
+  
+  return { valid: true, error: null };
+};
 
 const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handleCancelClick, isRowInEditMode}) => {
     const columns = [
@@ -182,6 +201,14 @@ export default function AdminView() {
     };
   
     const handleSaveClick = (id) => {
+      const user = findUser(id)
+      const validation = validateUser(user);
+      if (!validation.valid) {
+        setUsers(users.filter((row) => row.id !== id));
+        setAlertMessage({ children: validation.error, severity: "error" });
+        throw new Error(validation.error); // Prevent row update
+      }
+
       setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
     };
   
@@ -231,6 +258,17 @@ export default function AdminView() {
       setRowModesModel(newRowModesModel);
     };
 
+    const handleRowEditStop = ({id}) => {
+      // Prevent row from being saved if validation fails
+      const user = users.find((user) => user.id === id);
+      const validation = validateUser(user);
+    
+      if (!validation.valid) {
+        setUsers((prevRows) => prevRows.filter((row) => row.id !== id)); // Remove invalid row
+      }
+    };
+    
+
     const handleCloseCustomAlert = () => setAlertMessage(null);   
 
     return (
@@ -252,6 +290,7 @@ export default function AdminView() {
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
           processRowUpdate={processRowUpdate}
+          onRowEditStop={handleRowEditStop}
           slots={{ toolbar: AddUserToolbar }}
           slotProps={{
             toolbar: { setUsers, setRowModesModel },
