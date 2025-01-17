@@ -198,12 +198,14 @@ export default function AdminView() {
 
     const handleSaveClick = (id) => {
         const user = findUser(id)
-        
-        const validation = validateUser(user);
-        if (!validation.valid) {
-            setUsers(users.filter(row => row.id !== id));
-            setAlertMessage({children: validation.error, severity: "error"});
-            throw new Error(validation.error); // Prevent row update
+
+        if (!user?.isNew) {
+            const validation = validateUser(user);
+            if (!validation.valid) {
+                setUsers(users.filter(row => row.id !== id));
+                setAlertMessage({children: validation.error, severity: "error"});
+                throw new Error(validation.error); // Prevent row update
+            }
         }
 
         setRowModesModel({...rowModesModel, [id]: {mode: GridRowModes.View}});
@@ -246,11 +248,19 @@ export default function AdminView() {
     }
 
     const processRowUpdate = async (newUser) => {
-        newUser.isNew ? await createNewUser(newUser) : await updateExistingUser(newUser);
+        try {
+            newUser.isNew ? await createNewUser(newUser) : await updateExistingUser(newUser);
 
-        const updatedRow = {...newUser, isNew: false};
-        setUsers(users.map(row => (row.id === newUser.id ? updatedRow : row)));
-        return updatedRow;
+            const updatedRow = {...newUser, isNew: false};
+            setUsers(users.map(row => (row.id === newUser.id ? updatedRow : row)));
+            
+            setAlertMessage({children: newUser.isNew ? `User created '${newUser.email}'.` : 'User updated.', severity: "success"});
+            
+            return updatedRow;
+        } catch (error) {
+            console.error(error);
+            setAlertMessage({children: newUser.isNew ? `Error occurred while creating new user '${newUser.email}'.` : 'Some error occurred.', severity: "error"});
+        }
     };
 
     const handleRowModesModelChange = (newRowModesModel) => {
