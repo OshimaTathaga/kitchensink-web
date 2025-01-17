@@ -63,14 +63,9 @@ const LoginForm = ({onLogin}) => {
             value={email}
             onChange={handleEmailChange}
             error={emailError}
-            helperText={emailError ? 'Please enter a valid email address.' : ''}
-          />
+            helperText={emailError ? 'Please enter a valid email address.' : ''}/>
 
-          <Tooltip
-            title="Password must be at least 8 characters long and contain at least one letter and one number."
-            arrow
-            placement="right"
-          >
+          <Tooltip title="Password must be at least 8 characters long and contain at least one letter and one number." arrow placement="right">
               <TextField
                 fullWidth
                 label="Password"

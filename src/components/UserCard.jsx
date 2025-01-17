@@ -6,11 +6,10 @@ import {
   CardHeader,
   IconButton,
   Box,
-  Typography,
+  Tooltip, TextField,
 } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import { useState } from "react";
-import EditableTextField from "./EditableTextField";
 import AlertPopup from '../components/AlertPopup.jsx';
 
 const cardStyle = {
@@ -24,11 +23,6 @@ const cardHeaderStyle = {
   display: "flex",
   justifyContent: "space-between"
 };
-
-const editableTextStyle = {
-  height: "40px",
-  padding: "8.5px"
-}
 
 const UserCard = ({ user, onSave, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -72,7 +66,7 @@ const UserCard = ({ user, onSave, onDelete }) => {
     onSave(formData); // Save the updated data
   };
 
-  const gridItemStyle = { display: "flex", flexDirection: "column", gap: "16px" };
+  const gridItemStyle = { display: "flex", flexDirection: "column" };
 
   return (
     <>
@@ -95,19 +89,57 @@ const UserCard = ({ user, onSave, onDelete }) => {
         />
   
         <CardContent>
-          <Grid container spacing={"16px"}>
-            <Grid item xs={6} sx={gridItemStyle}>
-              <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Name:</Typography>
-              <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Email:</Typography>
-              <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Phone:</Typography>
-              <Typography variant="body1" fontWeight="bold" sx={editableTextStyle}>Password:</Typography>
-            </Grid>
-        
-            <Grid item xs={6} sx={gridItemStyle}>
-              <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handleNameChange} name="name" value={name} />
-              <Typography variant="body1" sx={editableTextStyle}>{email}</Typography>
-              <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handlePhoneChange} name="phoneNumber" value={phoneNumber} />
-              <EditableTextField style={editableTextStyle} isEditing={isEditing} handleChange={handlePasswordChange} name="password" value={isEditing ? password : maskedPassword} error={passwordError} helperText={"Password does not \n meet the policy requirements."} />
+          <Grid container>
+            <Grid item xs={12} sx={gridItemStyle}>
+              
+              {/* Name Field */}
+              <TextField
+                fullWidth
+                disabled={!isEditing}
+                label="Name"
+                variant="outlined"
+                margin="normal"
+                value={name}
+                onChange={handleNameChange}
+                error={nameError}
+                helperText={nameError ? 'Name must be at least 5 characters long.' : ''} />
+              
+              {/* Email Field */}
+              <TextField fullWidth disabled label="Email" variant="outlined" margin="normal" value={email} />
+              
+              {/* Phone Number Field */}
+              <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                <TextField label="Country Code" value="+91" disabled variant="outlined" sx={{width: '100px', mt: 1}} />
+                <Tooltip disableHoverListener={!isEditing} title="Exactly 10 digits without any spaces or special characters." arrow placement="right">
+                  <TextField
+                    fullWidth
+                    disabled={!isEditing}
+                    label="Phone Number"
+                    variant="outlined"
+                    margin="normal"
+                    value={phoneNumber}
+                    onChange={handlePhoneChange}
+                    error={phoneError}
+                    helperText={phoneError ? 'Phone number must be exactly 10 digits.' : ''}
+                  />
+                </Tooltip>
+              </Box>
+              
+              {/* Password Field with Tooltip */}
+              <Tooltip disableHoverListener={!isEditing} title="Password must be at least 8 characters long and contain at least one letter and one number." arrow placement="right">
+                <TextField
+                  fullWidth
+                  label="Password"
+                  type="password"
+                  variant="outlined"
+                  margin="normal"
+                  disabled={!isEditing}
+                  value={isEditing ? password : maskedPassword}
+                  onChange={handlePasswordChange}
+                  error={passwordError}
+                  helperText={passwordError ? 'Password does not meet the policy requirements.' : ''} />
+              </Tooltip>
+              
             </Grid>
           </Grid>
         </CardContent>
