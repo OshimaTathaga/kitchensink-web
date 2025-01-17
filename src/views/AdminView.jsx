@@ -36,7 +36,7 @@ const validateUser = (user) => {
     return { valid: false, error: "Name cannot be empty" };
   }
 
-  if (!user.email || emailRegex.test(user.email)) {
+  if (!user.email || !emailRegex.test(user.email)) {
     return { valid: false, error: "Please enter a valid email address." };
   }
 
