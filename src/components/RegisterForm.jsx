@@ -6,6 +6,10 @@ import MicrosoftIcon from "@mui/icons-material/AccountCircle";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import {api} from "../api/api.js";
 
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const PHONE_REGEX = /^\d{10}$/;  // Exactly 10 digits for Indian numbers
+export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // At least 8 chars, 1 letter, 1 number
+
 const RegisterForm = ({ setAlertMessage }) => {
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -16,14 +20,10 @@ const RegisterForm = ({ setAlertMessage }) => {
     const [passwordError, setPasswordError] = useState(false);
     const [nameError, setNameError] = useState(false);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // At least 8 chars, 1 letter, 1 number
-    const phoneRegex = /^\d{10}$/; // Exactly 10 digits for Indian numbers
-
     const handleEmailChange = (e) => {
         const value = e.target.value;
         setEmail(value);
-        setEmailError(!emailRegex.test(value)); // Validate email format
+        setEmailError(!EMAIL_REGEX.test(value)); // Validate email format
     };
 
     const handleNameChange = (e) => {
@@ -35,13 +35,13 @@ const RegisterForm = ({ setAlertMessage }) => {
     const handlePhoneChange = (e) => {
         const value = e.target.value;
         setPhoneNumber(value);
-        setPhoneError(!phoneRegex.test(value)); // Validate phone number
+        setPhoneError(!PHONE_REGEX.test(value)); // Validate phone number
     };
 
     const handlePasswordChange = (e) => {
         const value = e.target.value;
         setPassword(value);
-        setPasswordError(!passwordRegex.test(value)); // Validate password policy
+        setPasswordError(!PASSWORD_REGEX.test(value)); // Validate password policy
     };
 
     const handleRegister = async (e) => {

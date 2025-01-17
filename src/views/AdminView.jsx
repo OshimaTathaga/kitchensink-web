@@ -1,8 +1,11 @@
+import {useEffect, useState} from "react";
+
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
+
 import {Box} from "@mui/material";
 import Button from '@mui/material/Button';
 import {
@@ -10,13 +13,14 @@ import {
     GridActionsCellItem,
     GridRowModes,
     GridToolbarContainer,
+    useGridApiRef,
 } from '@mui/x-data-grid';
-import {useEffect, useState} from "react";
+
 import {api} from "../api/api.js";
 import CustomAlert from "../components/CustomAlert.jsx";
 import {deleteUser, updateUserRole, updateUser, createUser} from '../api/userService.js';
 import AlertPopup from '../components/AlertPopup.jsx';
-import {useGridApiRef} from '@mui/x-data-grid';
+import {EMAIL_REGEX, PHONE_REGEX} from "../components/RegisterForm.jsx";
 
 const containerStyle = {
     width: "70vw",
@@ -26,24 +30,19 @@ const containerStyle = {
     alignItems: "center",
 };
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
-const phoneRegex = /^\d{10}$/; // Exactly 10 digits for Indian numbers
-
 const getCellClassName = (isRowInEditMode) => isRowInEditMode ? "editable-cell" : ""
 
 const validateUser = (user) => {
-
-    console.log(`validateUser: '${JSON.stringify(user)}'.`);
 
     if (!user.name || user.name.length < 5) {
         return {valid: false, error: "Name cannot be empty"};
     }
 
-    if (!user.email || !emailRegex.test(user.email)) {
+    if (!user.email || !EMAIL_REGEX.test(user.email)) {
         return {valid: false, error: "Please enter a valid email address."};
     }
 
-    if (!user.phoneNumber || !phoneRegex.test(user.phoneNumber)) {
+    if (!user.phoneNumber || !PHONE_REGEX.test(user.phoneNumber)) {
         return {valid: false, error: "Phone number must be at least 10 digits long"};
     }
 
@@ -101,9 +100,7 @@ const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handle
                           key={"Save"}
                           icon={<SaveIcon/>}
                           label="Save"
-                          sx={{
-                              color: "primary.main",
-                          }}
+                          sx={{color: "primary.main"}}
                           onClick={() => handleSaveClick(id)}
                         />,
                         <GridActionsCellItem
@@ -124,15 +121,13 @@ const getColumns = ({handleSaveClick, handleEditClick, handleDeleteClick, handle
                       label="Edit"
                       className="textPrimary"
                       onClick={() => handleEditClick(id)}
-                      color="inherit"
-                    />,
+                      color="inherit" />,
                     <GridActionsCellItem
                       key={"Delete"}
                       icon={<DeleteIcon/>}
                       label="Delete"
                       onClick={() => handleDeleteClick(id)}
-                      color="inherit"
-                    />,
+                      color="inherit" />,
                 ];
             },
         },
@@ -204,8 +199,6 @@ export default function AdminView() {
     const handleSaveClick = (id) => {
         const user = findUser(id)
         
-        console.log(`handleSaveClick --> id: '${id}', user: '${JSON.stringify(user)}'.`);
-        
         const validation = validateUser(user);
         if (!validation.valid) {
             setUsers(users.filter(row => row.id !== id));
@@ -242,23 +235,17 @@ export default function AdminView() {
     };
 
     const createNewUser = async (newUser) => {
-        console.log(`createNewUser newUser: '${JSON.stringify(newUser)}'.`);
-        
         await createUser(newUser)
         await updateUserRole(newUser.email, [(newUser.role).toUpperCase()])
     }
 
     const updateExistingUser = async (newUser) => {
-        console.log(`updateExistingUser newUser: '${JSON.stringify(newUser)}'.`);
-        
         const oldUser = findUser(newUser.id);
         await updateUser(oldUser.email, newUser);
         await updateUserRole(oldUser.email, [(newUser.role).toUpperCase()]);
     }
 
     const processRowUpdate = async (newUser) => {
-        console.log(`processRowUpdate newUser: '${JSON.stringify(newUser)}'.`);
-
         newUser.isNew ? await createNewUser(newUser) : await updateExistingUser(newUser);
 
         const updatedRow = {...newUser, isNew: false};
@@ -274,8 +261,6 @@ export default function AdminView() {
         // Prevent row from being saved if validation fails
         const user = users.find(user => user.id === id);
 
-        console.log(`handleRowEditStop --> id: '${id}', user: '${JSON.stringify(user)}'.`);
-        
         const validation = validateUser(user);
 
         if (!validation.valid) {
@@ -306,18 +291,14 @@ export default function AdminView() {
             processRowUpdate={processRowUpdate}
             onRowEditStop={handleRowEditStop}
             slots={{toolbar: AddUserToolbar}}
-            slotProps={{
-                toolbar: {setUsers, setRowModesModel},
-            }}
-          />
+            slotProps={{toolbar: {setUsers, setRowModesModel}}} />
           <CustomAlert alertMessage={alertMessage} handleCloseCustomAlert={handleCloseCustomAlert}/>
           {isOpen && (
             <AlertPopup
               isOpen={isOpen}
               message={`Are you sure you want to delete user with email '${findUser(userIdToDelete)?.email}'?`}
               handleAgreeClick={handleAgreeDelete}
-              handleClose={() => setIsOpen(false)}
-            />
+              handleClose={() => setIsOpen(false)} />
           )}
       </Box>
     );
