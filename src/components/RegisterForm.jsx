@@ -7,7 +7,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import {api} from "../api/api.js";
 
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const PHONE_REGEX = /^\d{10}$/;  // Exactly 10 digits for Indian numbers
+export const PHONE_REGEX = /^[6-9][0-9]{9}$/;  // Exactly 10 digits for Indian numbers
 export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // At least 8 chars, 1 letter, 1 number
 
 const RegisterForm = ({ setAlertMessage }) => {
